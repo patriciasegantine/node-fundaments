@@ -1,4 +1,5 @@
 import http from 'node:http'
+import { json } from './middlewares/json.js'
 
 const hostname = '127.0.0.1'
 const port = 5000
@@ -8,21 +9,10 @@ const users = []
 const server = http.createServer(async (req, res) => {
   const {method, url} = req
 
-  const buffers = []
-
-  for await (const chuck of req) {
-    buffers.push(chuck)
-  }
-
-  try {
-    req.body = JSON.parse(Buffer.concat(buffers).toString())
-  } catch {
-    req.body = null
-  }
+  await json(req, res)
 
   if (method === 'GET' && url === '/users') {
-    return res
-      .setHeader('Content-type', 'application/json')
+    res
       .end(JSON.stringify(users))
   }
 
